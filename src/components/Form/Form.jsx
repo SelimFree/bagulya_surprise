@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import emailjs from "emailjs-com";
 import "./Form.scss";
 import { getEmailDataByCode } from "../../data";
@@ -7,6 +7,7 @@ function Form() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("Давай, попробуй )");
   const [loading, setLoading] = useState(false);
+  const [audioSrc, setAudioSrc] = useState("");
   const voiceRef = useRef();
 
   const handleSubmit = async (e) => {
@@ -20,12 +21,16 @@ function Form() {
       setError(error);
     }
     setLoading(false);
+    voiceRef.current
+      .play()
+      .catch((error) => console.error("Error playing audio:", error));
   };
 
   const sendEmal = async () => {
     const emailData = getEmailDataByCode(code);
 
     if (!emailData) {
+      setAudioSrc(`assets/audio/voice_no.m4a`);
       return { success: false };
     }
 
@@ -40,6 +45,7 @@ function Form() {
           );
 
           console.log("Email successfully sent!", result.text);
+          setAudioSrc(`assets/audio/voice_yes.m4a`);
           setCode("");
           return { success: true, error: "Проверь свою почту )" };
         } catch (error) {
@@ -49,13 +55,18 @@ function Form() {
       case "audio":
         if (voiceRef.current) {
           await new Promise((resolve) => setTimeout(resolve, 3000));
-
-          let audioPlayer = voiceRef.current;
-          audioPlayer.src = `assets/audio/${emailData.src}`;
-          audioPlayer.play();
+          setAudioSrc(`assets/audio/${emailData.src}`);
           setCode("");
           return { success: true, error: "Сделай погромче )" };
         }
+    }
+  };
+
+  const handleAudioLoaded = () => {
+    if (voiceRef.current) {
+      voiceRef.current
+        .play()
+        .catch((error) => console.error("Error playing audio:", error));
     }
   };
 
@@ -79,7 +90,12 @@ function Form() {
           Нажми на меня
         </button>
       </form>
-      <audio id="voice" ref={voiceRef}></audio>
+      <audio
+        id="voice"
+        ref={voiceRef}
+        src={audioSrc}
+        onLoadedData={handleAudioLoaded}
+      ></audio>
     </div>
   );
 }
