@@ -78,10 +78,6 @@ export const getEmailDataByCode = (code) => {
         моя... дойдем до эпилога нашей собственной истории, вместе?
         `,
       code: "Безумно люблю тебя Бягуль",
-    },
-    voice: {
-      type: "audio",
-      src: `voice_${Math.floor(Math.random() * 9) + 1}.m4a`
     }
   };
 
@@ -102,9 +98,6 @@ export const getEmailDataByCode = (code) => {
       break;
     case "рассвет":
       actualCode = "dawn";
-      break;
-    case "безумно люблю тебя бягуль":
-      actualCode = "voice";
       break;
   }
   const emailData = codeList[actualCode];

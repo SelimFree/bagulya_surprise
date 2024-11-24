@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import emailjs from "emailjs-com";
 import "./Form.scss";
 import { getEmailDataByCode } from "../../data";
+import Counter from "../Counter/Counter";
 
 function Form() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("Давай, попробуй )");
   const [loading, setLoading] = useState(false);
+  const [beating, setBeating] = useState(false);
   const [audioSrc, setAudioSrc] = useState("");
   const voiceRef = useRef();
+  const voice_number = 10;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,6 +27,17 @@ function Form() {
     voiceRef.current
       .play()
       .catch((error) => console.error("Error playing audio:", error));
+  };
+
+  const handleAudio = async () => {
+    setBeating(true);
+    if (voiceRef.current) {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setAudioSrc(
+        `assets/audio/voice_${Math.floor(Math.random() * voice_number) + 1}.m4a`
+      );
+    }
+    setBeating(false);
   };
 
   const sendEmal = async () => {
@@ -52,13 +66,6 @@ function Form() {
           console.error("Failed to send email:", error);
           return { success: false };
         }
-      case "audio":
-        if (voiceRef.current) {
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-          setAudioSrc(`assets/audio/${emailData.src}`);
-          setCode("");
-          return { success: true, error: "Сделай погромче )" };
-        }
     }
   };
 
@@ -73,6 +80,7 @@ function Form() {
   return (
     <div className="Form">
       <h2 className="welcome-title">Привет мой цветочек :)</h2>
+      <Counter />
       <form
         className={`input-form${loading ? " loading" : ""}`}
         onSubmit={handleSubmit}
@@ -90,6 +98,12 @@ function Form() {
           Нажми на меня
         </button>
       </form>
+      <div
+        className={`heart${beating ? " beating" : ""}`}
+        onClick={handleAudio}
+      >
+        ❤️
+      </div>
       <audio
         id="voice"
         ref={voiceRef}
